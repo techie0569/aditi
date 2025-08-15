@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For Aditi — Starry Night</title>
+  <style>
+    :root {
+      --bg1: #0b1026; /* deep navy */
+      --bg2: #1a2356; /* indigo */
+      --accent: #ffd6e7; /* soft pink-white */
+      --glow: rgba(255, 255, 255, 0.8);
+    }
+
+    @font-face {
+      font-family: "InterVar";
+      src: local("Inter"), local("Inter Variable"), url('https://fonts.gstatic.com/s/inter/v12/UcCO3Fwr0Lwl8wKpLQ.woff2') format('woff2');
+      font-display: swap;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, InterVar, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: #f4f7ff;
+      background: radial-gradient(1200px 800px at 70% 10%, #24307a 0%, var(--bg2) 25%, var(--bg1) 65%);
+      overflow: hidden;
+    }
+
+    .sky {
+      position: fixed; inset: 0; overflow: hidden;
+    }
+
+    .hint {
+      position: absolute; left: 50%; top: 10%; transform: translateX(-50%);
+      font-size: clamp(16px, 2vw, 20px);
+      opacity: 0.8; letter-spacing: 0.3px;
+    }
+
+    .final-message {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      pointer-events: none; opacity: 0; transition: opacity 900ms ease-out;
+      text-align: center; padding: 24px;
+      background: radial-gradient(600px 400px at 50% 55%, rgba(255,255,255,0.06), transparent 70%);
+    }
+    .final-message.show { opacity: 1; }
+    .final-box {
+      max-width: 720px;
+      line-height: 1.5; font-weight: 600;
+      font-size: clamp(18px, 3.4vw, 28px);
+      padding: 22px 28px; border-radius: 20px;
+      backdrop-filter: blur(4px);
+      background: rgba(10, 14, 31, 0.35);
+      box-shadow: 0 0 30px rgba(255,255,255,0.08), 0 0 120px rgba(135, 206, 250, 0.15) inset;
+      border: 1px solid rgba(255,255,255,0.12);
+      text-shadow: 0 0 18px rgba(255,255,255,0.25);
+    }
+
+    /* Star basics */
+    .star {
+      --size: 2px; /* default */
+      position: absolute; width: var(--size); height: var(--size);
+      border-radius: 50%; background: #fff; opacity: 0.85;
+      box-shadow: 0 0 8px rgba(255,255,255,0.7);
+      animation: twinkle var(--twinkle, 2.5s) infinite ease-in-out;
+      cursor: pointer;
+      transition: transform 240ms ease, box-shadow 240ms ease, opacity 240ms ease;
+    }
+    .star.clicked { opacity: 0.3; box-shadow: 0 0 3px rgba(255,255,255,0.4); }
+    .star:hover { transform: scale(1.6); }
+
+    @keyframes twinkle { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+    /* Message bubble */
+    .bubble {
+      position: absolute; min-width: 220px; max-width: min(90vw, 420px);
+      background: rgba(14, 18, 42, 0.72);
+      color: #eaf0ff; border: 1px solid rgba(255,255,255,0.18);
+      padding: 12px 14px; border-radius: 14px; line-height: 1.4;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 24px rgba(160, 200, 255, 0.22);
+      backdrop-filter: blur(6px);
+      transform-origin: 50% 100%;
+      transform: translate(-50%, -14px) scale(0.92);
+      opacity: 0; pointer-events: none;
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 5;
+      text-align: center;
+      font-size: clamp(14px, 1.8vw, 18px);
+    }
+    .bubble.show { opacity: 1; transform: translate(-50%, -16px) scale(1); }
+
+    .bubble::after {
+      content: ""; position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%);
+      border-width: 8px; border-style: solid;
+      border-color: rgba(14, 18, 42, 0.72) transparent transparent transparent;
+      filter: drop-shadow(0 -1px 0 rgba(255,255,255,0.18));
+    }
+
+    /* Title */
+    .title {
+      position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
+      font-weight: 500; letter-spacing: 0.6px; opacity: 0.8;
+      font-size: clamp(12px, 1.6vw, 16px);
+    }
+
+    /* Shooting star */
+    .shooting-star {
+      position: absolute; top: -10vh; left: -20vw; width: 2px; height: 2px; background: white;
+      box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 20px rgba(160,200,255,0.8);
+      transform: translate3d(0,0,0) rotate(25deg);
+      animation: shoot 12s linear infinite; opacity: 0.7;
+    }
+    .shooting-star::after {
+      content: ""; position: absolute; width: 140px; height: 2px; right: 2px; top: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+      filter: blur(1px);
+    }
+    @keyframes shoot {
+      0%   { transform: translate3d(-30vw,-10vh,0) rotate(25deg); opacity: 0; }
+      5%   { opacity: 0.9; }
+      50%  { transform: translate3d(130vw, 90vh,0) rotate(25deg); opacity: 0.8; }
+      100% { opacity: 0; }
+    }
+
+    /* Accessibility / small screens */
+    @media (max-width: 480px) {
+      .bubble { min-width: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sky" id="sky"></div>
+  <div class="hint">Tap the stars ✨</div>
+  <div class="title">For Aditi</div>
+
+  <div class="final-message" id="final">
+    <div class="final-box" id="finalText">I’m sorry.</div>
+  </div>
+
+  <script>
+    // ===== CONFIGURABLE CONTENT =====
+    const messages = [
+      "I don’t know if you’re hurt or not… but I’m still sorry.",
+      "Aditi, you’re one of the most important people in my life.",
+      "Your smile makes my days brighter.",
+      "Your presence makes my world warmer.",
+      "I’m grateful for you — always.",
+      "The stars may fade… but my care for you never will.",
+      "I’ll try harder for us.",
+      "You’re my brightest star.",
+      "I’ll always be here for you.",
+      "You matter more than you know."
+    ];
+
+    // Optional: customize the final reveal text
+    const finalRevealText = "Even in the darkest nights, you’re my brightest star. — Yours";
+    document.getElementById('finalText').textContent = finalRevealText;
+
+    // ===== STAR FIELD GENERATION =====
+    const sky = document.getElementById('sky');
+    const total = messages.length;
+    let shown = 0;
+
+    // keep references to bubbles so we can hide previous
+    let currentBubble = null;
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    // Create a shooting star for ambience
+    const shooting = document.createElement('div');
+    shooting.className = 'shooting-star';
+    sky.appendChild(shooting);
+
+    // Place stars without crowding too close to edges/center UI
+    const placements = [];
+
+    for (let i = 0; i < total; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+
+      // random size & twinkle speed
+      const size = rand(2, 3.5).toFixed(2) + 'px';
+      star.style.setProperty('--size', size);
+      star.style.setProperty('--twinkle', rand(1.8, 3.6) + 's');
+
+      // position
+      let x = rand(8, 92); // vw
+      let y = rand(18, 88); // vh (avoid hint at top)
+
+      // Simple separation: avoid too-close placements
+      let attempts = 0;
+      while (attempts < 40 && placements.some(p => {
+        const dx = p.x - x; const dy = p.y - y; return Math.hypot(dx, dy) < 10; // 10vw approx
+      })) {
+        x = rand(8, 92); y = rand(18, 88); attempts++;
+      }
+
+      star.style.left = x + 'vw';
+      star.style.top  = y + 'vh';
+      placements.push({ x, y });
+
+      // Bubble for the message
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = messages[i];
+      bubble.style.left = x + 'vw';
+      bubble.style.top  = y + 'vh';
+
+      // click handler
+      star.addEventListener('click', () => {
+        if (!star.classList.contains('clicked')) {
+          star.classList.add('clicked');
+          shown++;
+        }
+        // hide previous bubble
+        if (currentBubble && currentBubble !== bubble) {
+          currentBubble.classList.remove('show');
+        }
+        // toggle this bubble
+        const isVisible = bubble.classList.contains('show');
+        if (!isVisible) {
+          bubble.classList.add('show');
+          currentBubble = bubble;
+        } else {
+          bubble.classList.remove('show');
+          currentBubble = null;
+        }
+
+        if (shown >= total) {
+          // reveal final message
+          document.getElementById('final').classList.add('show');
+        }
+      }, { passive: true });
+
+      sky.appendChild(star);
+      sky.appendChild(bubble);
+    }
+
+    // Close bubble on background click (optional UX nicety)
+    sky.addEventListener('click', (e) => {
+      if (e.target.classList.contains('star')) return; // handled above
+      if (currentBubble) {
+        currentBubble.classList.remove('show');
+        currentBubble = null;
+      }
+    });
+
+    // Optional background music (uncomment to enable; provide your own audio file)
+    // const audio = new Audio('your-soft-music.mp3');
+    // audio.loop = true;
+    // document.addEventListener('click', () => { audio.play().catch(() => {}); }, { once: true });
+  </script>
+</body>
+</html>
